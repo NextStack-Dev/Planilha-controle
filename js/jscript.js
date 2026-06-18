@@ -1,35 +1,52 @@
-const URL_PLANILHA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS4Fh2OPqHI7zzbS568XAmdOAvLIrUhWSZHLumwUD_s4SKCv9fDcSQWBLnZPub-XRvt_fEe6MxdC7c9/pub?gid=0&single=true&output=csv";
+const URL_PLANILHA = "https://corsproxy.io/?https://nextstreambr-my.sharepoint.com/personal/cbezerra_engemon_nextstream_com/_layouts/15/download.aspx?UniqueId=a2194094%2D0671%2D4949%2Db0cc%2De765ddfecc38";
 
 async function carregarCalibracoes() {
   try {
+    console.log("Buscando dados...");
+    
+    // Mudança importante: usamos 'mode: cors' ou buscamos como blob se necessário
     const resposta = await fetch(URL_PLANILHA);
+    
+    if (!resposta.ok) throw new Error(`Erro: ${resposta.status}`);
+
     const textoCsv = await resposta.text();
     const dados = csvParaObjeto(textoCsv);
     renderizarTabela(dados);
+    
   } catch (erro) {
-    console.error("Erro ao carregar dados:", erro);
+    console.error("Erro no carregamento:", erro);
+    // Caso o erro de CORS persista, o site ficará sem dados.
   }
 }
 
 function csvParaObjeto(textoCsv) {
-  const linhas = textoCsv.split("\n");
-  const cabecalhos = linhas[0].split(",");
+  // 1. Remove o caractere invisível BOM que o Excel costuma colocar no início do arquivo
+  const csvLimpo = textoCsv.replace(/^\uFEFF/, "");
+  
+  const linhas = csvLimpo.split("\n");
+  
+  // 2. Mudado de "," para ";" porque o Excel/SharePoint nacional usa ponto e vírgula
+  const cabecalhos = linhas[0].split(";");
   
   return linhas.slice(1).map(linha => {
-    const valores = linha.split(",");
+    if (!linha.trim()) return null; // Ignora linhas vazias no final do arquivo
+    
+    // 3. Mudado de "," para ";" também na separação dos valores da linha
+    const valores = linha.split(";");
     let obj = {};
+    
     cabecalhos.forEach((cabecalho, index) => {
-      // Remove espaços e aspas ocultas dos cabeçalhos
+      // Remove espaços, quebras de linha (\r) e aspas ocultas dos cabeçalhos
       const chave = cabecalho.trim().replace(/\r/g, "").replace(/^"|"$/g, "");
       let valor = valores[index] ? valores[index].trim().replace(/\r/g, "") : "";
       
-      // Limpa aspas geradas pelo Sheets devido a espaços invisíveis
+      // Limpa aspas geradas devido a espaços invisíveis
       valor = valor.replace(/^"|"$/g, "").trim();
       
       obj[chave] = valor;
     });
     return obj;
-  });
+  }).filter(item => item !== null); // Remove os registros nulos das linhas vazias
 }
 
 function renderizarTabela(equipamentos) {
