@@ -23,7 +23,7 @@ e suas datas de vencimento para controle de calibração.
 ## Como editar
 
 - Para alterar o layout ou estilos, edite [css/style.css](css/style.css).
-- Para alterar a lógica ou adicionar dados, edite [js/jscript.js](js/jscript.js) ou [js/script.js](js/script.js).
+- Para alterar a lógica ou adicionar dados, edite [js/jscript.js](js/jscript.js).
 - Para alterar o conteúdo estático, edite [index.html](index.html).
 
 ## Contribuição
@@ -37,4 +37,4 @@ Consulte o arquivo [LICENSE](LICENSE) para detalhes sobre a licença.
 ---
 
 Arquivo gerado automaticamente: documentação resumida do projeto.
-[Acesse o repositório](https://nextstack-dev.github.io/Planilha-controle/)
+[Acesse a planilha de controle](https://nextstack-dev.github.io/Planilha-controle/)
