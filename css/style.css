@@ -1,0 +1,190 @@
+@charset "UTF-8";
+
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f7f9fc; /* Um fundo leve para dar contraste com a tabela branca */
+}
+
+.contain {
+    padding: 10px;
+    width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+}
+
+h1 {
+    text-align: center;
+    color: rgb(4, 4, 188);
+    margin-bottom: 25px;
+}
+
+main {
+    border-radius: 8px;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.296);
+    width: 100%;
+    max-width: 1000px; /* Aumentado para acomodar as 4 colunas com folga */
+}
+
+.main-table {
+    display: flex;
+    flex-direction: column;
+    border: 2px solid #333;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.row {
+    display: flex;
+    border-bottom: 2px solid #333;
+    min-height: 50px; /* Altura flexível com mínimo para parecer planilha */
+    align-items: center; /* Centraliza verticalmente */
+}
+
+.row:last-child {
+    border-bottom: none;
+}
+
+.header {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    min-height: 50px;
+}
+
+.col {
+    padding: 10px 15px;
+    height: 100%; /* Ocupa toda altura da linha */
+    display: flex;
+    align-items: center; /* Centraliza verticalmente */
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   Distribuição Proporcional das 4 Colunas (Equipamento, Modelo, Empresa, Vencimento)
+   ========================================================================== */
+
+/* 1ª Coluna: Equipamento (Ocupa o maior espaço disponível) */
+.row .col:nth-child(1) {
+    flex: 2; 
+    min-width: 180px;
+    border-right: 2px solid #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 2ª Coluna: Modelo */
+.row .col:nth-child(2) {
+    flex: 1;
+    min-width: 100px;
+    border-right: 2px solid #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 3ª Coluna: Empresa */
+.row .col:nth-child(3) {
+    flex: 1;
+    min-width: 120px;
+    border-right: 2px solid #333;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 4ª Coluna: Vencimento (Largura fixa e conteúdo centralizado) */
+.row .col:nth-child(4) {
+    width: 130px;
+    min-width: 130px;
+    max-width: 130px;
+    white-space: nowrap;
+    font-weight: 500;
+    justify-content: center; /* Centraliza horizontalmente o texto da data */
+    font-size: 0.95rem;
+    border-right: none; /* Última coluna não possui borda na direita */
+}
+
+/* ==========================================================================
+   Cores de Fundo por Status e Alertas
+   ========================================================================== */
+
+/* Cores de Fundo por Status */
+.row.vencido {
+    background-color: #ffcccc; /* Vermelho claro */
+}   
+.row.no-mes {
+    background-color: #fff4cc; /* Amarelo/Laranja claro */
+}    
+.row.em-dia {
+    background-color: #d4edda; /* Verde claro */
+}    
+
+/* Estilo para o ícone de alerta */
+.alerta-icone {
+    display: inline-block;
+    margin-right: 8px;
+    margin-left: 5px;
+    
+    /* Sombra de contraste: cria um leve contorno preto para destacar o ícone */
+    filter: drop-shadow(0px 0px 2px rgba(0, 0, 0, 0.429));
+    
+    /* Cor e tamanho */
+    color: #b91c1c; 
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* Forçando a animação com prioridade */
+.row.vencido .alerta-icone {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; } /* Além de piscar, ele aumenta de tamanho */
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Ajuste para HTML interno na descrição se houver tags */
+.row .col:nth-child(1) * {
+    display: inline;
+}
+
+/* ==========================================================================
+   Responsividade para Celulares (Telas até 600px)
+   ========================================================================== */
+@media (max-width: 700px) {
+    /* Faz o container principal ocupar toda a largura da tela do celular */
+    main {
+        max-width: 100%;
+    }
+
+    /* Oculta a 2ª coluna (Modelo) e a 3ª coluna (Empresa) */
+    .row .col:nth-child(2),
+    .row .col:nth-child(3) {
+        display: none;
+    }
+
+    /* Ajusta a 1ª coluna (Equipamento) para ocupar o espaço que sobrou */
+    .row .col:nth-child(1) {
+        flex: 1;
+        min-width: 0; /* Remove o min-width antigo para não empurrar a tela */
+    }
+
+    /* Mantém a data de vencimento visível e bem ajustada na direita */
+    .row .col:nth-child(4) {
+        width: 110px; /* Reduz ligeiramente a largura para telas muito estreitas */
+        min-width: 110px;
+        max-width: 110px;
+    }
+}
