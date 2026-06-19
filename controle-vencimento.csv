@@ -1,10 +1,12 @@
 Descricao,Modelo,Patrimonio,Data-calibracao,Vencimento,Empresa
-"Alicate Amperímetro Digital ",376 FC,23113,"28/01/2026",28/01/2027,Engemon
+"Alicate Amperímetro Digital ,376 FC,23113,""28/01/2026"
+",28/01/2027,Engemon
 Alicate Amperímetro Digital,376 FC,22182,26/02/2026,26/02/2027,Engemon
 Termômetro Infravermelho,62 Max,23115,22/01/2026,22/01/2027,Engemon
 Termovisor,Ti10,1148,22/01/2026,22/01/2027,Engemon
 Detector de Tensão,275,2455,09/02/2026,09/02/2027,Engemon
-Analisador de Qualidade de Energia,435,16409,16/02/2026,"16/02/2027 ",Engemon
+Analisador de Qualidade de Energia,435,16409,16/02/2026,16/02/2027 "
+",Engemon
 Megôhmetro,1503,17586,22/01/2026,22/01/2027,Engemon
 Multímetro Digital,177,23129,28/01/2026,28/01/2027,Engemon
 Multímetro Digital,15B+,22602,26/02/2026,26/02/2027,Engemon
@@ -13,4 +15,4 @@ Indicador de sequência de fase (Fasímetro),MFA-850,17598,28/01/2026,28/01/2027
 Termohigrômetro,971,6212,29/01/2026,29/01/2027,Engemon
 Alicate Amperimetro Digital,325,NA,05/02/2025,05/02/2027,Heating Cooling
 Anemômetro,435,NA,09/04/2025,09/04/2027,Heating Cooling
-Termohigrômetro Digital,971,NA,09/09/2024,09/09/2026,Heating Cooling
+Termohigrômetro Digital,971,NA,09/09/2024,09/09/2026,Heating Cooling"
