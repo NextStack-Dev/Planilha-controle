@@ -1,7 +1,7 @@
 // ========== CONFIGURAÇÃO ==========
 // ATENÇÃO: Substitua pelas URLs reais dos JSONs no OneDrive
-const URL_EQUIPAMENTOS = 'https://nextstreambr-my.sharepoint.com/:u:/g/personal/cbezerra_engemon_nextstream_com/IQCVDe8aVGa0TIkWQRc2Mn4CAUJhhnczegHMu4ExGrmLdpo';
-const URL_LAUDOS = 'https://nextstreambr-my.sharepoint.com/:u:/g/personal/cbezerra_engemon_nextstream_com/IQDa5vG4PgAvQ5YTYD2fB4cPAR6WPvI8eYHainVa8reMDqY';
+const URL_EQUIPAMENTOS = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://nextstreambr-my.sharepoint.com/:u:/g/personal/cbezerra_engemon_nextstream_com/IQCVDe8aVGa0TIkWQRc2Mn4CAUJhhnczegHMu4ExGrmLdpo?download=1');
+const URL_LAUDOS = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://nextstreambr-my.sharepoint.com/:u:/g/personal/cbezerra_engemon_nextstream_com/IQDa5vG4PgAvQ5YTYD2fB4cPAR6WPvI8eYHainVa8reMDqY?download=1');
 
 let equipamentosData = [];
 let laudosData = [];
