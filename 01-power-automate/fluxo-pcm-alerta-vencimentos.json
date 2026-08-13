@@ -1,0 +1,193 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/logicAppDefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "triggers": {
+    "Recurrence": {
+      "type": "Recurrence",
+      "recurrence": {
+        "frequency": "Day",
+        "interval": 1,
+        "startTime": "2026-08-12T07:00:00",
+        "timeZone": "E. South America Standard Time"
+      }
+    }
+  },
+  "actions": {
+    "Listar_linhas_equipamentos": {
+      "runAfter": {},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "connectionName": "shared_excelonline",
+          "operationId": "GetItems",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared/excelonline"
+        },
+        "parameters": {
+          "location": "{OneDrive_Location_Id}",
+          "doc_Id": "{Excel_Document_Id}",
+          "table": "equipamentos"
+        }
+      },
+      "description": "Lê a tabela 'equipamentos' do Excel Online"
+    },
+    "Listar_linhas_laudos": {
+      "runAfter": {},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "connectionName": "shared_excelonline",
+          "operationId": "GetItems",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared/excelonline"
+        },
+        "parameters": {
+          "location": "{OneDrive_Location_Id}",
+          "doc_Id": "{Excel_Document_Id}",
+          "table": "laudos"
+        }
+      },
+      "description": "Lê a tabela 'laudos' do Excel Online"
+    },
+    "Listar_linhas_contatos": {
+      "runAfter": {},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {
+          "connectionName": "shared_excelonline",
+          "operationId": "GetItems",
+          "apiId": "/providers/Microsoft.PowerApps/apis/shared/excelonline"
+        },
+        "parameters": {
+          "location": "{OneDrive_Location_Id}",
+          "doc_Id": "{Excel_Document_Id}",
+          "table": "contatos"
+        }
+      },
+      "description": "Lê a tabela 'contatos' do Excel Online"
+    },
+    "Combinar_equipamentos_e_laudos": {
+      "runAfter": {
+        "Listar_linhas_equipamentos": ["Succeeded"],
+        "Listar_linhas_laudos": ["Succeeded"]
+      },
+      "type": "Expression",
+      "inputs": "union(body('Listar_linhas_equipamentos')?['value'], body('Listar_linhas_laudos')?['value'])",
+      "description": "Combina os itens de equipamentos e laudos em uma única lista"
+    },
+    "Filtrar_itens_com_vencimento_proximo": {
+      "runAfter": {
+        "Combinar_equipamentos_e_laudos": ["Succeeded"]
+      },
+      "type": "Query",
+      "inputs": {
+        "from": "@variables('lista_combinada')",
+        "where": "@lessOrEquals(item()?['data_venc'], addDays(utcNow(), 30, 'yyyy-MM-dd'))"
+      },
+      "description": "Filtra itens cuja data de vencimento é menor ou igual a 30 dias a partir de hoje"
+    },
+    "Verificar_se_ha_itens": {
+      "runAfter": {
+        "Filtrar_itens_com_vencimento_proximo": ["Succeeded"]
+      },
+      "type": "If",
+      "inputs": {
+        "expression": {
+          "and": [
+            {
+              "greater": [
+                "@length(body('Filtrar_itens_com_vencimento_proximo'))",
+                0
+              ]
+            }
+          ]
+        }
+      },
+      "description": "Verifica se existem itens para enviar alerta"
+    },
+    "Criar_tabela_HTML": {
+      "runAfter": {
+        "Verificar_se_ha_itens": ["Succeeded"]
+      },
+      "type": "Table",
+      "inputs": {
+        "format": "HTML",
+        "from": "@body('Filtrar_itens_com_vencimento_proximo')",
+        "columns": [
+          {
+            "header": "Descrição",
+            "value": "@item()?['descricao']"
+          },
+          {
+            "header": "Fabricante",
+            "value": "@item()?['fabricante']"
+          },
+          {
+            "header": "Patrimônio",
+            "value": "@item()?['patrimonio']"
+          },
+          {
+            "header": "Empresa",
+            "value": "@item()?['empresa']"
+          },
+          {
+            "header": "Data de Início",
+            "value": "@formatDateTime(item()?['data_inic'], 'dd/MM/yyyy')"
+          },
+          {
+            "header": "Data de Vencimento",
+            "value": "@formatDateTime(item()?['data_venc'], 'dd/MM/yyyy')"
+          }
+        ]
+      },
+      "description": "Monta tabela HTML com os itens críticos formatados"
+    },
+    "Preparar_corpo_email": {
+      "runAfter": {
+        "Criar_tabela_HTML": ["Succeeded"]
+      },
+      "type": "Compose",
+      "inputs": "<!DOCTYPE html>\n<html lang=\"pt-BR\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Alerta de Vencimentos PCM</title>\n    <style>\n        body { font-family: Arial, sans-serif; color: #333; }\n        .container { max-width: 600px; margin: 20px auto; }\n        .header { background-color: #002060; color: white; padding: 20px; border-radius: 4px; }\n        .content { margin: 20px 0; }\n        table { width: 100%; border-collapse: collapse; margin: 20px 0; }\n        th { background-color: #4472C4; color: white; padding: 10px; text-align: left; }\n        td { border: 1px solid #ddd; padding: 10px; }\n        tr:nth-child(even) { background-color: #f2f2f2; }\n        .button { display: inline-block; background-color: #002060; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; margin-top: 20px; }\n        .footer { font-size: 12px; color: #666; margin-top: 20px; }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h2>Alerta de Vencimentos - Sistema PCM</h2>\n        </div>\n        <div class=\"content\">\n            <p>Olá,</p>\n            <p>O seguinte equipamento/laudo está com o vencimento agendado para os próximos dias:</p>\n            @{body('Criar_tabela_HTML')}\n            <p>Favor verificar as pendências e abrir o chamado para renovação.</p>\n            <p>Para visualizar o status completo e a interação visual de todos os equipamentos, acesse:</p>\n            <a href=\"{OneDrive_Excel_Link}\" class=\"button\">Abrir Painel de Controle</a>\n        </div>\n        <div class=\"footer\">\n            <p>Atenciosamente,<br><strong>Sistema de Controle Automático PCM</strong></p>\n            <p>Este é um email automático. Favor não responder.</p>\n        </div>\n    </div>\n</body>\n</html>",
+      "description": "Prepara o corpo do email em formato HTML formatado"
+    },
+    "Para_cada_contato": {
+      "runAfter": {
+        "Preparar_corpo_email": ["Succeeded"]
+      },
+      "type": "Foreach",
+      "inputs": {
+        "from": "@body('Listar_linhas_contatos')?['value']",
+        "actions": {
+          "Enviar_email_para_contato": {
+            "type": "OpenApiConnection",
+            "inputs": {
+              "host": {
+                "connectionName": "shared_office365",
+                "operationId": "SendEmailV2",
+                "apiId": "/providers/Microsoft.PowerApps/apis/shared/office365"
+              },
+              "parameters": {
+                "emailMessage": {
+                  "to": "@items('Para_cada_contato')?['email']",
+                  "subject": "[ALERTA] Equipamentos com Vencimento Próximo",
+                  "body": "@outputs('Preparar_corpo_email')",
+                  "isHtml": true
+                }
+              }
+            },
+            "description": "Envia o email de alerta para cada contato da lista"
+          }
+        }
+      },
+      "description": "Itera sobre cada contato e envia o email de alerta"
+    },
+    "Log_sucesso": {
+      "runAfter": {
+        "Para_cada_contato": ["Succeeded"]
+      },
+      "type": "Compose",
+      "inputs": "Fluxo executado com sucesso. @{length(body('Filtrar_itens_com_vencimento_proximo'))} item(ns) alertado(s).",
+      "description": "Registra sucesso da execução"
+    }
+  },
+  "outputs": {}
+}

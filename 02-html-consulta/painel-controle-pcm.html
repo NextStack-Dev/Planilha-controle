@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Controle PCM - Gestão de Vencimentos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #002060;
+            --primary-dark: #001a42;
+            --accent-color: #4472C4;
+            --success-color: #70AD47;
+            --warning-color: #FFC000;
+            --danger-color: #FF6B6B;
+            --light-bg: #F5F5F5;
+            --text-primary: #333;
+            --text-secondary: #666;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-bg) 0%, #fff 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 30px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .header-title p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .header-info {
+            text-align: right;
+            font-size: 12px;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        /* Filtros e Controles */
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            background: white;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(68, 114, 196, 0.3);
+        }
+
+        /* Cards de Resumo */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .card.critical {
+            border-left-color: var(--danger-color);
+        }
+
+        .card.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        .card.safe {
+            border-left-color: var(--success-color);
+        }
+
+        .card-number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        .card-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Tabelas */
+        .table-section {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--light-bg);
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.vencido {
+            background-color: #ffe0e0;
+            color: var(--danger-color);
+        }
+
+        .badge.proximo {
+            background-color: #fff4e0;
+            color: #e89e1a;
+        }
+
+        .badge.seguro {
+            background-color: #e0f7e0;
+            color: var(--success-color);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 12px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .header-title h1 {
+                font-size: 22px;
+            }
+
+            .header-info {
+                text-align: center;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .filter-group select,
+            .filter-group input {
+                width: 100%;
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="header-title">
+                <h1>📋 Sistema PCM - Controle de Vencimentos</h1>
+                <p>Gestão centralizada de equipamentos, laudos e contratos</p>
+            </div>
+            <div class="header-info">
+                <p id="last-update">Última atualização: -</p>
+                <p>Status: <span id="status-indicator" style="color: #70AD47;">● Online</span></p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Filtros -->
+        <div class="controls">
+            <div class="filter-group">
+                <label>Filtrar por tipo:</label>
+                <select id="typeFilter" onchange="filterData()">
+                    <option value="todos">Todos</option>
+                    <option value="equipamentos">Equipamentos</option>
+                    <option value="laudos">Laudos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Filtrar por status:</label>
+                <select id="statusFilter" onchange="filterData()">
+                    <option value="todos">Todos</option>
+                    <option value="vencido">Vencido</option>
+                    <option value="proximo">Próximo (0-30 dias)</option>
+                    <option value="seguro">Seguro (>30 dias)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Cards de Resumo -->
+        <div class="summary-cards" id="summaryCards">
+            <div class="card critical">
+                <div class="card-label">⚠️ Vencidos</div>
+                <div class="card-number" id="totalVencidos">0</div>
+                <div class="card-description">Requerem ação imediata</div>
+            </div>
+            <div class="card warning">
+                <div class="card-label">🔔 Próximos 30 dias</div>
+                <div class="card-number" id="totalProximos">0</div>
+                <div class="card-description">Acompanhamento próximo</div>
+            </div>
+            <div class="card safe">
+                <div class="card-label">✓ Seguros</div>
+                <div class="card-number" id="totalSeguros">0</div>
+                <div class="card-description">Fora do período crítico</div>
+            </div>
+            <div class="card">
+                <div class="card-label">📊 Total de itens</div>
+                <div class="card-number" id="totalItens">0</div>
+                <div class="card-description">Equipamentos + Laudos</div>
+            </div>
+        </div>
+
+        <!-- Tabela de Equipamentos -->
+        <div class="table-section">
+            <div class="section-header">🏭 Equipamentos</div>
+            <div class="table-responsive">
+                <table id="equipamentosTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Fabricante</th>
+                            <th>Patrimônio</th>
+                            <th>Empresa</th>
+                            <th>Data de Início</th>
+                            <th>Data de Vencimento</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="equipamentosBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Carregando dados...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tabela de Laudos -->
+        <div class="table-section">
+            <div class="section-header">📄 Laudos e Certificados</div>
+            <div class="table-responsive">
+                <table id="laudosTable">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Fabricante</th>
+                            <th>Patrimônio</th>
+                            <th>Empresa</th>
+                            <th>Data de Início</th>
+                            <th>Data de Vencimento</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laudosBody">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div class="loading">
+                                    <div class="spinner"></div>
+                                    <p>Carregando dados...</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2026 Sistema de Controle Automático PCM - Planejamento e Controle de Manutenção</p>
+        <p>Dados atualizados via Power Automate | Modo: Somente Leitura</p>
+    </footer>
+
+    <script>
+        // Dados de exemplo (remova quando integrar com JSON real)
+        const mockData = {
+            equipamentos: [
+                {
+                    descricao: "Analisador de Qualidade de Energia",
+                    fabricante: "FLUKE",
+                    patrimonio: "16409",
+                    empresa: "Data Center Centro",
+                    data_inic: "2024-01-15",
+                    data_venc: "2026-08-15"
+                },
+                {
+                    descricao: "Termovisora Infravermelha",
+                    fabricante: "FLIR",
+                    patrimonio: "12055",
+                    empresa: "Infraestrutura",
+                    data_inic: "2023-06-20",
+                    data_venc: "2026-06-20"
+                },
+                {
+                    descricao: "Multímetro Digital",
+                    fabricante: "HIKOKI",
+                    patrimonio: "09876",
+                    empresa: "Manutenção",
+                    data_inic: "2022-12-01",
+                    data_venc: "2026-08-05"
+                }
+            ],
+            laudos: [
+                {
+                    descricao: "AVCB - Auto de Vistoria do Corpo de Bombeiros",
+                    fabricante: "CB-SP",
+                    patrimonio: "AVCB-2026-001",
+                    empresa: "Data Center Centro",
+                    data_inic: "2024-06-01",
+                    data_venc: "2026-06-01"
+                },
+                {
+                    descricao: "Certificado de Linhas de Vida",
+                    fabricante: "Inspeção Técnica",
+                    patrimonio: "LINHA-VIDA-001",
+                    empresa: "Segurança Altura",
+                    data_inic: "2023-09-10",
+                    data_venc: "2026-09-10"
+                }
+            ]
+        };
+
+        // Função para calcular status
+        function getStatus(dataVenc) {
+            const hoje = new Date();
+            const vencimento = new Date(dataVenc);
+            const diasRestantes = Math.floor((vencimento - hoje) / (1000 * 60 * 60 * 24));
+
+            if (diasRestantes < 0) return { status: 'vencido', label: '❌ Vencido', class: 'badge vencido' };
+            if (diasRestantes <= 30) return { status: 'proximo', label: `⏳ ${diasRestantes} dias`, class: 'badge proximo' };
+            return { status: 'seguro', label: '✓ Seguro', class: 'badge seguro' };
+        }
+
+        // Função para formatar data
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        // Função para renderizar tabela
+        function renderTable(data, tableBodyId) {
+            const tbody = document.getElementById(tableBodyId);
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum registro encontrado</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => {
+                const statusInfo = getStatus(item.data_venc);
+                return `
+                    <tr>
+                        <td>${item.descricao}</td>
+                        <td>${item.fabricante}</td>
+                        <td>${item.patrimonio}</td>
+                        <td>${item.empresa}</td>
+                        <td>${formatDate(item.data_inic)}</td>
+                        <td><strong>${formatDate(item.data_venc)}</strong></td>
+                        <td><span class="${statusInfo.class}">${statusInfo.label}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Função para atualizar cards de resumo
+        function updateSummary(equipamentos, laudos) {
+            const todos = [...equipamentos, ...laudos];
+            let vencidos = 0, proximos = 0, seguros = 0;
+
+            todos.forEach(item => {
+                const statusInfo = getStatus(item.data_venc);
+                if (statusInfo.status === 'vencido') vencidos++;
+                else if (statusInfo.status === 'proximo') proximos++;
+                else seguros++;
+            });
+
+            document.getElementById('totalVencidos').textContent = vencidos;
+            document.getElementById('totalProximos').textContent = proximos;
+            document.getElementById('totalSeguros').textContent = seguros;
+            document.getElementById('totalItens').textContent = todos.length;
+            document.getElementById('last-update').textContent = `Última atualização: ${new Date().toLocaleString('pt-BR')}`;
+        }
+
+        // Função para filtrar dados
+        function filterData() {
+            // Implementar lógica de filtro quando necessário
+            console.log('Filtro ativado');
+        }
+
+        // Inicializar página
+        function init() {
+            renderTable(mockData.equipamentos, 'equipamentosBody');
+            renderTable(mockData.laudos, 'laudosBody');
+            updateSummary(mockData.equipamentos, mockData.laudos);
+        }
+
+        // Executar ao carregar página
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Recarregar dados a cada 5 minutos (opcional)
+        // setInterval(init, 300000);
+    </script>
+</body>
+</html>
