@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Controle PCM - Gestão de Vencimentos</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <!-- Header -->
     <header>
@@ -72,12 +74,14 @@
             </div>
         </div>
 
-        <!-- Tabela de Equipamentos -->
-        <div class="table-section" id="equipamentosSection">
-            <div class="section-header">🏭 Equipamentos</div>
+        <!-- Tabela Única -->
+        <!-- Tabela Única -->
+        <div class="table-section">
+            <div class="section-header" id="sectionTitle">🏭 Equipamentos</div>
             <div class="table-responsive">
                 <table>
-                    <thead>
+                    <!-- CABEÇALHO DE EQUIPAMENTOS (Completo) -->
+                    <thead id="thead-equipamentos">
                         <tr>
                             <th>Descrição</th>
                             <th>Fabricante</th>
@@ -88,31 +92,26 @@
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="equipamentosBody">
-                        <tr><td colspan="7" class="loading">Carregando dados...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
-        <!-- Tabela de Laudos -->
-        <div class="table-section" id="laudosSection">
-            <div class="section-header">📄 Laudos e Certificados</div>
-            <div class="table-responsive">
-                <table>
-                    <thead>
+                    <!-- CABEÇALHO DE LAUDOS (Enxuto, sem as colunas vazias) -->
+                    <thead id="thead-laudos" style="display: none;">
                         <tr>
                             <th>Descrição</th>
-                            <th>Fabricante</th>
-                            <th>Patrimônio</th>
                             <th>Empresa</th>
-                            <th>Data de Início</th>
                             <th>Data de Vencimento</th>
                             <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody id="laudosBody">
-                        <tr><td colspan="7" class="loading">Carregando dados...</td></tr>
+
+                    <tbody id="equipamentosBody">
+                        <tr>
+                            <td colspan="7" class="loading">Carregando dados...</td>
+                        </tr>
+                    </tbody>
+                    <tbody id="laudosBody" style="display: none;">
+                        <tr>
+                            <td colspan="3" class="loading">Carregando dados...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -127,4 +126,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
