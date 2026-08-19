@@ -29,15 +29,41 @@ function formatDate(dateStr) {
 
 function getFilterValues() {
     const status = document.getElementById('statusFilter').value;
-    return { status };
+    const empresa = document.getElementById('empresaFilter').value;
+    return { status, empresa };
+}
+
+// ========== FUNÇÕES PARA EMPRESAS ==========
+function getUniqueEmpresas(data) {
+    const empresas = data
+        .map(item => item.empresa)
+        .filter(emp => emp && emp.trim() !== '');
+    return ['todas', ...new Set(empresas)];
+}
+
+function populateEmpresaFilter(empresas) {
+    const select = document.getElementById('empresaFilter');
+    const currentValue = select.value;
+    select.innerHTML = '';
+    
+    empresas.forEach(emp => {
+        const option = document.createElement('option');
+        option.value = emp;
+        option.textContent = emp === 'todas' ? 'Todas' : emp;
+        select.appendChild(option);
+    });
+    
+    if (empresas.includes(currentValue)) {
+        select.value = currentValue;
+    }
 }
 
 // ========== RENDERIZAÇÃO ==========
-// Função para renderizar Equipamentos (7 colunas)
+// Função para renderizar Equipamentos (6 colunas - sem Data de Início)
 function renderEquipamentos(data) {
     const tbody = document.getElementById('equipamentosBody');
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Nenhum registro encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum registro encontrado</td></tr>';
         return;
     }
 
@@ -60,7 +86,7 @@ function renderEquipamentos(data) {
 function renderLaudos(data) {
     const tbody = document.getElementById('laudosBody');
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum registro encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum registro encontrado</td></tr>';
         return;
     }
 
@@ -109,16 +135,16 @@ function updateTableVisibility() {
 
     if (activeTab === 'equipamentos') {
         sectionTitle.innerHTML = '🏭 Equipamentos';
-        theadEquip.style.display = ''; // Mostra cabeçalho completo
-        theadLaudos.style.display = 'none'; // Esconde cabeçalho enxuto
-        equipBody.style.display = ''; // Mostra corpo
-        laudosBody.style.display = 'none'; // Esconde corpo
+        theadEquip.style.display = '';
+        theadLaudos.style.display = 'none';
+        equipBody.style.display = '';
+        laudosBody.style.display = 'none';
     } else if (activeTab === 'laudos') {
         sectionTitle.innerHTML = '📄 Laudos e Certificados';
-        theadEquip.style.display = 'none'; // Esconde cabeçalho completo
-        theadLaudos.style.display = ''; // Mostra cabeçalho enxuto
-        equipBody.style.display = 'none'; // Esconde corpo
-        laudosBody.style.display = ''; // Mostra corpo
+        theadEquip.style.display = 'none';
+        theadLaudos.style.display = '';
+        equipBody.style.display = 'none';
+        laudosBody.style.display = '';
     }
 }
 
@@ -128,12 +154,22 @@ function switchTab(tab) {
     document.querySelectorAll('.switch-label').forEach(el => {
         el.classList.toggle('active', el.dataset.tab === tab);
     });
+
+    // Atualiza opções do select de empresa
+    if (tab === 'equipamentos') {
+        const empresas = getUniqueEmpresas(equipamentosData);
+        populateEmpresaFilter(empresas);
+    } else if (tab === 'laudos') {
+        const empresas = getUniqueEmpresas(laudosData);
+        populateEmpresaFilter(empresas);
+    }
+
     updateTableVisibility();
     applyFilters();
 }
 
 function applyFilters() {
-    const { status } = getFilterValues();
+    const { status, empresa } = getFilterValues();
 
     let equipFiltrados = [];
     let laudosFiltrados = [];
@@ -142,7 +178,8 @@ function applyFilters() {
     if (activeTab === 'equipamentos') {
         equipFiltrados = equipamentosData.filter(item => {
             const s = getStatus(item.data_venc).status;
-            return status === 'todos' || s === status;
+            const e = empresa === 'todas' || item.empresa === empresa;
+            return (status === 'todos' || s === status) && e;
         });
         renderEquipamentos(equipFiltrados);
     }
@@ -151,7 +188,8 @@ function applyFilters() {
     if (activeTab === 'laudos') {
         laudosFiltrados = laudosData.filter(item => {
             const s = getStatus(item.data_venc).status;
-            return status === 'todos' || s === status;
+            const e = empresa === 'todas' || item.empresa === empresa;
+            return (status === 'todos' || s === status) && e;
         });
         renderLaudos(laudosFiltrados);
     }
@@ -160,7 +198,7 @@ function applyFilters() {
 // ========== CARREGAR DADOS ==========
 async function carregarDados() {
     try {
-        document.getElementById('equipamentosBody').innerHTML = '<tr><td colspan="7" class="loading">🔄 Carregando equipamentos...</td></tr>';
+        document.getElementById('equipamentosBody').innerHTML = '<tr><td colspan="6" class="loading">🔄 Carregando equipamentos...</td></tr>';
         document.getElementById('laudosBody').innerHTML = '<tr><td colspan="4" class="loading">🔄 Carregando laudos...</td></tr>';
 
         const [respEquip, respLaudos] = await Promise.all([
@@ -180,6 +218,11 @@ async function carregarDados() {
         updateSummary(equipamentosData, laudosData);
         updateLastUpdate();
         updateTableVisibility();
+        
+        // Popula o select de empresas (inicialmente com equipamentos)
+        const empresas = getUniqueEmpresas(equipamentosData);
+        populateEmpresaFilter(empresas);
+        
         applyFilters();
 
         document.getElementById('status-indicator').textContent = '● Online';
@@ -187,7 +230,7 @@ async function carregarDados() {
 
     } catch (error) {
         console.error('Erro ao carregar dados locais:', error);
-        document.getElementById('equipamentosBody').innerHTML = `<tr><td colspan="7" class="empty-state">❌ Erro: ${error.message}</td></tr>`;
+        document.getElementById('equipamentosBody').innerHTML = `<tr><td colspan="6" class="empty-state">❌ Erro: ${error.message}</td></tr>`;
         document.getElementById('laudosBody').innerHTML = `<tr><td colspan="4" class="empty-state">❌ Erro: ${error.message}</td></tr>`;
         document.getElementById('status-indicator').textContent = '● Offline';
         document.getElementById('status-indicator').style.color = '#FF6B6B';
@@ -196,6 +239,7 @@ async function carregarDados() {
 
 // ========== EVENTOS ==========
 document.getElementById('statusFilter').addEventListener('change', applyFilters);
+document.getElementById('empresaFilter').addEventListener('change', applyFilters);
 document.getElementById('refreshBtn').addEventListener('click', carregarDados);
 
 document.querySelectorAll('.switch-label').forEach(el => {
