@@ -49,7 +49,6 @@ function renderEquipamentos(data) {
                 <td>${item.fabricante || '-'}</td>
                 <td>${item.patrimonio || '-'}</td>
                 <td>${item.empresa || '-'}</td>
-                <td>${formatDate(item.data_inic)}</td>
                 <td><strong>${formatDate(item.data_venc)}</strong></td>
                 <td><span class="${statusInfo.class}">${statusInfo.label}</span></td>
             </tr>
@@ -61,7 +60,7 @@ function renderEquipamentos(data) {
 function renderLaudos(data) {
     const tbody = document.getElementById('laudosBody');
     if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Nenhum registro encontrado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Nenhum registro encontrado</td></tr>';
         return;
     }
 
